@@ -1,0 +1,4 @@
+gym==0.21.0
+numpy
+pygame==2.5.1
+pytest
