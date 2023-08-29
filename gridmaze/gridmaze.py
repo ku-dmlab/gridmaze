@@ -60,7 +60,8 @@ class GridMaze(gym.Env):
         self._goal_location: Tuple[int, int] = ()
         self._agent_location: Tuple[int, int] = ()
 
-        self._make_layout_from_str(layout)
+        self.layout = layout
+        self._make_layout_from_str(self.layout)
 
         self.action_space = spaces.Discrete(len(Action))
         self.observation_space = spaces.Dict({"agent": spaces.MultiDiscrete([self.grid_size[0], self.grid_size[1]])})
@@ -128,6 +129,8 @@ class GridMaze(gym.Env):
     def reset(self) -> Tuple[List, Dict]:
         self._cur_steps = 0
 
+        self._make_layout_from_str(self.layout)
+
         self.agent = Agent(*self._agent_location)
 
         obs = self._get_obs()
@@ -168,6 +171,8 @@ class GridMaze(gym.Env):
         self.render_mode = render_mode
         if self.render_mode == "rgb_array":
             return self._render_frame()
+        else: # human
+            self._render_frame()
 
     def close(self):
         if self.window is not None:
@@ -238,13 +243,17 @@ class GridMaze(gym.Env):
 
         if self.render_mode == "human":
             # the following line copies our drawings from 'canvas' to the visible window
-            self.window.blit(canvas, canvas.get_rect())
+            # self.window.blit(canvas, canvas.get_rect())
+            self.window.blit(pygame.transform.flip(pygame.transform.rotate(canvas, 270), True, False), canvas.get_rect())
             pygame.event.pump()
             pygame.display.update()
 
             # we need to ensure that human-rendering occurs at the predefined framerate.
             # the following line will automatically add a delay to keep the framerate stable.
             self.clock.tick(self.metadata["render_fps"])
+
+            # save image
+            pygame.image.save(self.window, "../captures/gridmaze.png")
         else: # rgb_array
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
@@ -253,21 +262,14 @@ class GridMaze(gym.Env):
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
+    from layouts import *
 
-    layout = """
-    a....x..
-    xxx.xx.x
-    .....x..
-    .x.x...x
-    ...x.xxx
-    xx.x....
-    .x.xxxx.
-    .g......
-    """ # 8x8 grid
+    layout = layout_8x8 # 8x8 grid
     env = GridMaze(layout, 100)
     obs, info = env.reset()
 
+    frame = env.render("human")
     action = env.action_space.sample()
     n_obs, reward, done, info = env.step(action)
-    frame = env.render()
+
     env.close()

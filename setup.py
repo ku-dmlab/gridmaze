@@ -9,7 +9,7 @@ setup(
     version="1.0.0",
     author="hy-kiera",
     url="https://github.com/ku-dmlab/gridmaze.git",
-    packages=find_packages(exclude=["captures", "tests"]),
+    packages=find_packages(exclude=["captures", "tests", "scripts"]),
     install_requires=[
         "gym==0.21.0",
         "numpy",
