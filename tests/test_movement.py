@@ -10,16 +10,11 @@ PROJECT_DIR = os.path.abspath(os.path.join(TEST_DIR, os.pardir))
 sys.path.insert(0, PROJECT_DIR)
 
 from gridmaze.gridmaze import GridMaze, Action
+from gridmaze.layouts import *
 
 @pytest.fixture
 def env_0():
-    layout = """
-    ...x.
-    .xxa.
-    ....x
-    xx.x.
-    ...g.
-    """
+    layout = layout_5x5
     env = GridMaze(layout, 100)
     obs, info = env.reset()
     return env
