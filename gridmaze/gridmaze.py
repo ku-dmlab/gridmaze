@@ -64,7 +64,7 @@ class GridMaze(gym.Env):
         self._make_layout_from_str(self.layout)
 
         self.action_space = spaces.Discrete(len(Action))
-        self.observation_space = spaces.Dict({"agent": spaces.MultiDiscrete([self.grid_size[0], self.grid_size[1]])})
+        self.observation_space = spaces.MultiDiscrete([self.grid_size[0], self.grid_size[1]])
 
         self._cur_steps = 0
         self.max_steps = max_steps
