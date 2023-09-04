@@ -64,7 +64,7 @@ class GridMaze(gym.Env):
         self._make_layout_from_str(self.layout)
 
         self.action_space = spaces.Discrete(len(Action))
-        self.observation_space = spaces.MultiDiscrete([self.grid_size[0], self.grid_size[1]])
+        self.observation_space = spaces.Box(low=0, high=self.grid_size[0] - 1, shape=(2,), dtype=int)
 
         self._cur_steps = 0
         self.max_steps = max_steps
@@ -117,14 +117,24 @@ class GridMaze(gym.Env):
     def _get_info(self):
         return {"distance": np.linalg.norm(np.array(self._agent_location) - np.array(self._goal_location), ord=1)}
     
+    def get_goal_location(self):
+        return self._goal_location
+    
+    def get_agent_location(self):
+        return self._agent_location
+    
     def set_goal_location(self, x, y):
-        assert self._is_corridor(x, y), f"({x}, {y}) is on walls"
-        self._goal_location = (x, y)
+        if self._is_corridor(x, y):
+            self._goal_location = (x, y)
+        else:
+            print(f"Warning: Cannot locate ({x}, {y})")
 
     def set_agent_location(self, x, y):
-        assert self._is_corridor(x, y), f"({x}, {y}) is on walls"
-        self.agent.set_location(x, y)
-        self._agent_location = self.agent.get_location()
+        if self._is_corridor(x, y):
+            self.agent.set_location(x, y)
+            self._agent_location = self.agent.get_location()
+        else:
+            print(f"Warning: Cannot locate ({x}, {y})")
     
     def reset(self) -> Tuple[List, Dict]:
         self._cur_steps = 0
@@ -252,8 +262,6 @@ class GridMaze(gym.Env):
             # the following line will automatically add a delay to keep the framerate stable.
             self.clock.tick(self.metadata["render_fps"])
 
-            # save image
-            pygame.image.save(self.window, "../captures/gridmaze.png")
         else: # rgb_array
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
